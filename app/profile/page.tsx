@@ -65,16 +65,10 @@ export default async function ProfilePage() {
                                         <Globe className="w-3.5 h-3.5 text-primary/60" />
                                         github.com/{user.user_metadata?.user_name || 'dev'}
                                     </div>
-                                    <div className="flex items-center gap-3 text-[11px] font-bold text-muted-foreground/80 lowercase tracking-tight">
-                                        <MapPin className="w-3.5 h-3.5 text-primary/60" />
-                                        Distributed Node
-                                    </div>
+
                                 </div>
 
-                                <Button className="w-full rounded-2xl h-11 font-black uppercase tracking-widest shadow-xl shadow-primary/10 transition-all hover:scale-[1.02]">
-                                    <Settings className="w-4 h-4 mr-2" />
-                                    Account Prefs
-                                </Button>
+
                             </div>
                         </Card>
 

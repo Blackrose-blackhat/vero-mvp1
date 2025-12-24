@@ -9,12 +9,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { getUserRepos, generateRepoQuestions, createPostWithAnswers } from '../repo_actions';
+import { generateRepoQuestions, createPostWithAnswers } from '../repo_actions';
 import { Send, CheckCircle2, ChevronRight, ArrowLeft, Loader2, Code2, Sparkles, Terminal, Shield, Zap, Search } from 'lucide-react';
 
-export default function RepoSelector() {
+export default function RepoSelector({ initialRepos }: { initialRepos: any[] }) {
     const router = useRouter();
-    const [repos, setRepos] = useState<any[]>([]);
+    const [repos, setRepos] = useState<any[]>(initialRepos);
 
 
 
@@ -29,19 +29,8 @@ export default function RepoSelector() {
     const [success, setSuccess] = useState(false);
     const [activeTab, setActiveTab] = useState("0");
 
-    useEffect(() => {
-        async function loadRepos() {
-            setLoading(true);
-            const res = await getUserRepos();
-            if (res.error) {
-                setError(res.error);
-            } else {
-                setRepos(res.repos || []);
-            }
-            setLoading(false);
-        }
-        loadRepos();
-    }, []);
+    // Repos loaded via props
+    // useEffect for loadRepos removed
 
     const handleSelectRepo = async (repo: any) => {
         setSelectedRepo(repo);

@@ -75,12 +75,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
                                     </div>
                                 </div>
 
-                                {isOwnProfile && (
-                                    <Button className="w-full rounded-2xl h-11 font-black uppercase tracking-widest shadow-xl shadow-primary/10 transition-all hover:scale-[1.02]">
-                                        <Settings className="w-4 h-4 mr-2" />
-                                        Account Prefs
-                                    </Button>
-                                )}
+
                             </div>
                         </Card>
 

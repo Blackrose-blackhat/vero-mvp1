@@ -13,34 +13,32 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { deletePost, getPostInteractions } from '../repo_actions';
+import { deletePost } from '../repo_actions';
 import PostInteractions from './PostInteractions';
 import CommentSection from './CommentSection';
 import AnswerEditor from './AnswerEditor';
 
-export default function PostCard({ post, currentUser }: { post: any; currentUser: any }) {
-    const [interactions, setInteractions] = useState<any>(null);
+export default function PostCard({ post, currentUser, interactions }: { post: any; currentUser?: any; interactions?: any }) {
     const [showComments, setShowComments] = useState(false);
     const [showAnswerEditor, setShowAnswerEditor] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const interactionsData = interactions;
 
-    useEffect(() => {
-        async function loadInteractions() {
-            const data = await getPostInteractions(post.id);
-            setInteractions(data);
-        }
-        loadInteractions();
-    }, [post.id]);
+    // Interactions are now passed as props from server component
 
     const isOwner = currentUser?.id === post.user_id;
 
     const handleDelete = async () => {
         if (confirm('Are you certain you want to remove this architectural publication?')) {
             setIsDeleting(true);
+            // Call server action deletePostAction (to be implemented)
             const res = await deletePost(post.id);
-            if (res.error) {
+            if (res?.error) {
                 alert(res.error);
                 setIsDeleting(false);
+            } else {
+                // Optionally refresh or navigate
+                window.location.reload();
             }
         }
     };
@@ -127,7 +125,7 @@ export default function PostCard({ post, currentUser }: { post: any; currentUser
                             </div>
 
                             {/* Answer Layer */}
-                            {interactions?.answers?.answers?.[i] ? (
+                            {interactionsData?.answers?.answers?.[i] ? (
                                 <div className="ml-16 relative">
                                     <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary/20 via-primary/5 to-transparent rounded-full" />
                                     <div className="pl-8 space-y-4">
@@ -193,19 +191,19 @@ export default function PostCard({ post, currentUser }: { post: any; currentUser
                 <div className="w-full">
                     <PostInteractions
                         postId={post.id}
-                        initialReactions={interactions?.reactionsCount || 0}
-                        reactionsByType={interactions?.reactionsByType || {}}
-                        currentUserReaction={interactions?.currentUserReaction}
-                        commentCount={interactions?.comments?.length || 0}
+                        initialReactions={interactionsData?.reactionsCount || 0}
+                        reactionsByType={interactionsData?.reactionsByType || {}}
+                        currentUserReaction={interactionsData?.currentUserReaction}
+                        commentCount={interactionsData?.comments?.length || 0}
                         onCommentToggle={() => setShowComments(!showComments)}
                         repoName={post.repo_name}
                         repoUrl={post.repo_url}
                         user={currentUser}
                     />
 
-                    {showComments && interactions && (
+                    {showComments && interactionsData && (
                         <div className="mt-8 animate-in fade-in slide-in-from-top-6 duration-500">
-                            <CommentSection postId={post.id} comments={interactions.comments} user={currentUser} />
+                            <CommentSection postId={post.id} comments={interactionsData.comments} user={currentUser} />
                         </div>
                     )}
                 </div>

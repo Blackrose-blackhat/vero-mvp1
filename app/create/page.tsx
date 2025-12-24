@@ -1,8 +1,10 @@
 import { upsertUserAndLogLogin } from '../actions';
 import { createSupabaseServerClient } from '../supabaseServerClient';
+
 import RepoSelector from '../components/RepoSelector';
 import { redirect } from 'next/navigation';
 import { Sparkles } from 'lucide-react';
+import { getUserRepos } from '../repo_actions';
 
 export default async function CreatePage() {
     const supabase = await createSupabaseServerClient();
@@ -14,6 +16,9 @@ export default async function CreatePage() {
 
     // Sync user data on the server
     await upsertUserAndLogLogin();
+
+    // Fetch repos server-side
+    const repos = await getUserRepos();
 
     return (
         <div className="min-h-screen bg-background selection:bg-primary/20 relative overflow-hidden">
@@ -37,7 +42,7 @@ export default async function CreatePage() {
                 </header>
 
                 <div className="flex justify-center">
-                    <RepoSelector />
+                    <RepoSelector initialRepos={repos?.repos || []} />
                 </div>
             </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from './supabaseServerClient';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 export async function getUserRepos() {
   const supabase = await createSupabaseServerClient();
@@ -9,9 +10,10 @@ export async function getUserRepos() {
 
   if (!session?.provider_token) {
     // If we don't have a provider token, we can't fetch private repos or detailed info easily
-    // But we can try to fetch public repos for the user's email/username if we have it
-    // For now, let's assume the session has the token (typical for GitHub OAuth)
-    console.warn('No provider token found in session. This might limit repository fetching.');
+    // This usually means the session is stale or scopes are missing. Force logout.
+    console.warn('No provider token found in session. This might limit repository fetching. Logging out.');
+    await supabase.auth.signOut();
+    redirect('/');
   }
 
   const { data: { user } } = await supabase.auth.getUser();

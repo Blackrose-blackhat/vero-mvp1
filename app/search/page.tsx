@@ -1,35 +1,24 @@
-'use client';
 
-import { useState, useEffect } from 'react';
+
 import Link from 'next/link';
-import { Search, User, Mail, ArrowRight, Loader2, Globe } from 'lucide-react';
+import { Search, Mail, ArrowRight, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { searchUsers } from '@/app/repo_actions';
-import { useAuth } from '@/app/components/AuthProvider';
+import { createSupabaseServerClient } from '@/app/supabaseServerClient';
 
-export default function SearchPage() {
-    const [query, setQuery] = useState('');
-    const [users, setUsers] = useState<any[]>([]);
-    const { user: currentUser } = useAuth();
-    const [loading, setLoading] = useState(false);
+export default async function SearchPage({ searchParams }: { searchParams?: { q?: string } }) {
+    const query = searchParams?.q ?? '';
+    const supabase = await createSupabaseServerClient();
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            setLoading(true);
-            const res = await searchUsers(query);
-            if ('users' in res && res.users) {
-                const filtered = currentUser ? res.users.filter((u) => u.id !== currentUser.id) : res.users;
-                setUsers(filtered);
-            }
-            setLoading(false);
-        };
-
-        const delayDebounceFn = setTimeout(fetchUsers, query ? 300 : 0);
-        return () => clearTimeout(delayDebounceFn);
-    }, [query, currentUser]);
+    const res = await searchUsers(query);
+    const users = ('users' in res && res.users)
+        ? currentUser
+            ? res.users.filter((u) => u.id !== currentUser.id)
+            : res.users
+        : [];
 
     return (
         <div className="min-h-screen bg-background p-6 sm:p-10 lg:p-20">
@@ -43,29 +32,30 @@ export default function SearchPage() {
                     </p>
                 </header>
 
-                <div className="relative group">
+                <form action="/search" method="GET" className="relative group">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-transparent rounded-[32px] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
                     <div className="relative">
                         <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/40" />
                         <Input
                             type="text"
+                            name="q"
                             placeholder="Search by name, email, or architectural specialty..."
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
+                            defaultValue={query}
                             className="w-full h-16 pl-16 pr-8 rounded-[30px] bg-card/60 backdrop-blur-xl border-border/40 text-lg font-medium focus:ring-4 focus:ring-primary/5 transition-all outline-none italic"
                         />
                     </div>
-                </div>
+                </form>
 
                 <div className="space-y-6">
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-40">
-                            <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] italic">Scanning Nodes...</p>
+                    {users.length === 0 ? (
+                        <div className="text-center py-20 bg-muted/5 rounded-[40px] border border-dashed border-border/40">
+                            <p className="text-sm font-bold text-muted-foreground/40 uppercase tracking-widest italic">
+                                No architectural nodes discovered in this sector.
+                            </p>
                         </div>
-                    ) : users.length > 0 ? (
+                    ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {users.map((user, i) => (
+                            {users.map((user) => (
                                 <Link key={user.id} href={`/profile/${user.id}`}>
                                     <Card className="rounded-[35px] border-border/40 bg-card/40 hover:bg-card/60 hover:border-primary/20 transition-all duration-500 group overflow-hidden relative">
                                         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -90,10 +80,6 @@ export default function SearchPage() {
                                     </Card>
                                 </Link>
                             ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-20 bg-muted/5 rounded-[40px] border border-dashed border-border/40">
-                            <p className="text-sm font-bold text-muted-foreground/40 uppercase tracking-widest italic">No architectural nodes discovered in this sector.</p>
                         </div>
                     )}
                 </div>
