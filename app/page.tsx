@@ -2,7 +2,7 @@ import { upsertUserAndLogLogin } from './actions';
 import { createSupabaseServerClient } from './supabaseServerClient';
 import { getLoginInsights } from './insights';
 import { getPublicFeed } from './repo_actions';
-import PostCard from './components/PostCard';
+import PostCardServer from './components/PostCardServer';
 import { Code2, Globe } from 'lucide-react';
 
 export default async function Home() {
@@ -70,7 +70,7 @@ export default async function Home() {
           ) : (
             <div className="grid grid-cols-1 gap-12">
               {posts.map((post: any) => (
-                <PostCard key={post.id} post={post} currentUser={user} />
+                <PostCardServer key={post.id} post={post} />
               ))}
             </div>
           )}
